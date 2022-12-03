@@ -10,7 +10,7 @@ async fn download_audio(url: &str, pref_format: &str){
        .arg(url)
        .arg("--extract-audio")
        .arg("--audio-format")
-       .arg("{pref_format}")
+       .arg(pref_format)
        .output()
        .expect("Error!");
     println!("{:?}",output);
