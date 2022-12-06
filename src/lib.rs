@@ -1,9 +1,7 @@
 
 use std::{process::Command};
 
-use futures::executor::block_on;
-
-async fn download_audio(url: &str, pref_format: &str){
+pub async fn download(url: &str, pref_format: &str) -> Result<String, String>{
     // Command::new("cd ~").output().expect("Error");
     println!("Starting");
     let output = Command::new("youtube-dl")
@@ -11,12 +9,8 @@ async fn download_audio(url: &str, pref_format: &str){
        .arg("--extract-audio")
        .arg("--audio-format")
        .arg(pref_format)
-       .output()
-       .expect("Error!");
-    println!("{:?}",output);
+       .output(); 
+    Ok(String::from(format!("Done!{:?}",output)))
 }
 
-pub fn download(url: &str, pref_format: &str){
-    block_on(download_audio(url, pref_format));
-}
 
