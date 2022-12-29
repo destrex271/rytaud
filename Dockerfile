@@ -3,6 +3,9 @@ FROM rust:1.65
 WORKDIR app
 COPY . .
 
-RUN cargo install --path
+RUN cargo install --path .
 
-CMD["cargo run"]
+EXPOSE 8000
+VOLUME .:/app
+
+CMD cargo run

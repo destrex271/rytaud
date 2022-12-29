@@ -1,5 +1,7 @@
 use std::{process::Command};
 use dotenv::dotenv;
+use std::time;
+use std::thread;
 
 pub async fn download(url: &str, key: &str, pref_format: &str) -> Result<String, String>{
     println!("Starting");
@@ -14,9 +16,19 @@ pub async fn download(url: &str, key: &str, pref_format: &str) -> Result<String,
     Ok(String::from(format!("Ok")))
 }
 
-pub fn delete(name: &str) -> Result<String, String>{
-    let _ = Command::new("rm")
-        .arg(name)
-        .output();
-    Ok(String::from("OK"))
+pub fn del_service(){
+    while(true){
+        println!("Deleting all mp3 files");
+        let t = time::SystemTime::now().elapsed();
+        println!("{:?}", t);
+        thread::sleep();
+    }
+    // let _ = Command::new("rm").arg("*.mp3");
 }
+
+// pub fn delete(name: &str) -> Result<String, String>{
+//     let _ = Command::new("rm")
+//         .arg(name)
+//         .output();
+//     Ok(String::from("OK"))
+// }

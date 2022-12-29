@@ -2,6 +2,7 @@ use actix_files::Files;
 use actix_web::{HttpServer, Responder, App, post, HttpResponse, web::Json, get};
 use serde::{Serialize, Deserialize};
 use ytmp3;
+use std::thread;
 
 #[derive(Deserialize)]
 struct File{
@@ -24,6 +25,7 @@ async fn download_vid(req: Json<File>) -> impl Responder{
     }
 }
 
+
 #[post("/complete")]
 async fn delete_vid(req: Json<DelJ>) -> impl Responder{
     println!("Delete");
@@ -36,11 +38,16 @@ async fn delete_vid(req: Json<DelJ>) -> impl Responder{
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()>{
+    let del_ops = thread::spawn(|| {
+        ytmp3::del_service();
+    }); 
+    del_ops.join();
     HttpServer::new(||{
         App::new()
             .service(Files::new("/audio", ".").show_files_listing())
             .service(delete_vid)
             .service(download_vid)
+
     })
     .workers(10)
     .bind(("127.0.0.1", 8000))?
