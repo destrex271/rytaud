@@ -1,6 +1,6 @@
 use actix_files::Files;
-use actix_web::{HttpServer, Responder, App, post, HttpResponse, web::Json, get};
-use serde::{Serialize, Deserialize};
+use actix_web::{HttpServer, Responder, App, post, HttpResponse, web::Json};
+use serde::Deserialize;
 use ytmp3;
 use std::thread;
 
@@ -20,7 +20,7 @@ async fn download_vid(req: Json<File>) -> impl Responder{
     let url : &str = &req.url;
     let val = ytmp3::download(url, &req.key, "mp3").await;
     match val{
-        Ok(x) => HttpResponse::Ok().body(format!("/audio/{}.mp3", &req.key)),
+        Ok(_) => HttpResponse::Ok().body(format!("/audio/{}.mp3", &req.key)),
         Err(_) => HttpResponse::InternalServerError().body("Error")
     }
 }
@@ -41,16 +41,20 @@ async fn main() -> std::io::Result<()>{
     let del_ops = thread::spawn(|| {
         ytmp3::del_service();
     }); 
-    del_ops.join();
-    HttpServer::new(||{
+    println!("Starting server at: {:?}", std::time::SystemTime::now());
+    let server = HttpServer::new(||{
         App::new()
             .service(Files::new("/audio", ".").show_files_listing())
-            .service(delete_vid)
             .service(download_vid)
+            .service(delete_vid)
 
     })
     .workers(10)
-    .bind(("127.0.0.1", 8000))?
+    .bind(("0.0.0.0", 8000))?   // Setting server to 0.0.0.0 to make it accessible from outside but
+                                // 127.0.0.1 is loopback address and can be used only from within
+                                // the container
     .run()
-    .await
+    .await;
+    del_ops.join().unwrap();
+    server
 }
