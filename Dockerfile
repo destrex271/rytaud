@@ -1,14 +1,21 @@
 FROM rust:1.65 as builder
 
-WORKDIR /usr/src/ytmp3
-COPY . .
-# VOLUME . /usr/src/ytmp3
-RUN cargo install --path .
+WORKDIR /usr/src
 
-# Building debian image on top of rust tooling
-FROM alpine:latest
-RUN apk update && apk add youtube-dl
-COPY --from=builder /usr/local/cargo/bin/ytmp3 /usr/local/bin/ytmp3
-# VOLUME .:/usr/local/bin/ytmp3
-EXPOSE 8000
-ENTRYPOINT ["ytmp3"]
+RUN USER=root cargo new ytmp3
+
+COPY Cargo.toml Cargo.lock /usr/src/ytmp3/
+
+WORKDIR /usr/src/ytmp3
+
+# target platform for alpine
+COPY src /usr/src/ytmp3/src
+
+# Final build
+RUN cargo build --release
+
+# --------------------------------
+
+FROM debian:11-slim
+COPY --from=builder /usr/src/ytmp3/target/release/ytmp3 /usr/local/bin/ytmp3
+ENTRYPOINT ["/usr/local/bin/ytmp3"]

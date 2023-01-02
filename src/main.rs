@@ -1,8 +1,9 @@
 use actix_files::Files;
-use actix_web::{HttpServer, Responder, App, post, HttpResponse, web::Json};
-use serde::Deserialize;
+use actix_web::{HttpServer, Responder, App, post, HttpResponse, web};
+use serde::{Serialize, Deserialize};
 use ytmp3;
 use std::thread;
+use ctrlc;
 
 #[derive(Deserialize)]
 struct File{
@@ -15,19 +16,29 @@ struct DelJ{
     name: String
 }
 
+
+#[derive(Serialize)]
+struct Response{
+    file: Option<String>,
+    error: Option<String>
+}
+
 #[post("/download_audio")]
-async fn download_vid(req: Json<File>) -> impl Responder{
+async fn download_vid(req: web::Json<File>) -> impl Responder{
     let url : &str = &req.url;
     let val = ytmp3::download(url, &req.key, "mp3").await;
     match val{
-        Ok(_) => HttpResponse::Ok().body(format!("/audio/{}.mp3", &req.key)),
-        Err(_) => HttpResponse::InternalServerError().body("Error")
+        Ok(_) => web::Json(Response{
+            file: Some(format!("/audio/{}.mp3",req.key)),
+            error: None
+        }),
+        Err(x) => web::Json(Response{file: None, error: Some(x)})
     }
 }
 
 
 #[post("/complete")]
-async fn delete_vid(req: Json<DelJ>) -> impl Responder{
+async fn delete_vid(req: web::Json<DelJ>) -> impl Responder{
     println!("Delete");
     let v = ytmp3::delete(&req.name);
     match v{
@@ -39,6 +50,9 @@ async fn delete_vid(req: Json<DelJ>) -> impl Responder{
 #[actix_web::main]
 async fn main() -> std::io::Result<()>{
     let del_ops = thread::spawn(|| {
+        ctrlc::set_handler(move || {
+            std::process::exit(0);
+        }).expect("Error setting Ctrl-C handler");
         ytmp3::del_service();
     }); 
     println!("Starting server at: {:?}", std::time::SystemTime::now());

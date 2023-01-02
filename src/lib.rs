@@ -5,7 +5,7 @@ use std::thread;
 
 pub async fn download(url: &str, key: &str, pref_format: &str) -> Result<String, String>{
     println!("Starting");
-    Command::new("youtube-dl")
+    let _ = Command::new("youtube-dl")
         .arg("--rm-cache-dir")
         .output();
     let output = Command::new("youtube-dl")
@@ -15,7 +15,7 @@ pub async fn download(url: &str, key: &str, pref_format: &str) -> Result<String,
        .arg(pref_format)
        .arg("--output")
        .arg(format!("{}.mp3",key))
-       .output();
+       .output().expect("Unable to download");
     println!("{:?}", output);
     Ok(String::from(format!("Ok")))
 }
@@ -23,6 +23,9 @@ pub async fn download(url: &str, key: &str, pref_format: &str) -> Result<String,
 pub fn del_service(){
     loop{
         println!("Deleting all mp3 files");
+        let _ = Command::new("rm")
+            .arg("*.mp3")
+            .output();
         let t = time::SystemTime::now().elapsed();
         println!("{:?}", t);
         thread::sleep(Duration::from_secs(86400));
