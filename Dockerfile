@@ -16,6 +16,8 @@ RUN cargo build --release
 
 # --------------------------------
 
-FROM debian:11-slim
+FROM debian:bullseye-slim
+RUN apt-get update && apt-get install -y youtube-dl && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /usr/src/ytmp3/target/release/ytmp3 /usr/local/bin/ytmp3
+EXPOSE 8000
 ENTRYPOINT ["/usr/local/bin/ytmp3"]
