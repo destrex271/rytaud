@@ -1,9 +1,9 @@
 use std::{process::Command};
 // use dotenv::dotenv;
-use std::time::{self, Duration};
+use std::time::{Duration};
 use std::thread;
 
-pub async fn download(url: &str, key: &str, pref_format: &str) -> Result<String, String>{
+pub async fn download(url: &str, key: &str, pref_format: &str) -> Result<String, std::io::Error>{
     println!("Starting");
     let _ = Command::new("youtube-dl")
         .arg("--rm-cache-dir")
@@ -17,7 +17,8 @@ pub async fn download(url: &str, key: &str, pref_format: &str) -> Result<String,
        .arg(format!("{}.mp3",key))
        .output().expect("Unable to download");
     println!("{:?}", output);
-    Ok(String::from(format!("Ok")))
+    println!("Done");
+    Ok(String::from(key))
 }
 
 pub fn del_service(){
@@ -26,11 +27,8 @@ pub fn del_service(){
         let _ = Command::new("rm")
             .arg("*.mp3")
             .output();
-        let t = time::SystemTime::now().elapsed();
-        println!("{:?}", t);
         thread::sleep(Duration::from_secs(86400));
     }
-    // let _ = Command::new("rm").arg("*.mp3");
 }
 
 pub fn delete(name: &str) -> Result<String, String>{
