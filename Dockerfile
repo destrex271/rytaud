@@ -1,4 +1,4 @@
-FROM rust:1.65 as builder
+FROM rust:1.66 as builder
 
 WORKDIR /usr/src
 
@@ -17,7 +17,9 @@ RUN cargo build --release
 # --------------------------------
 
 FROM debian:bullseye-slim
-RUN apt-get update && apt-get install -y youtube-dl && rm -rf /var/lib/apt/lists/*
+# RUN apt-get update && apt-get install -y youtube-dl && rm -rf /var/lib/apt/lists/*
+# RUN apt-get update && apt-get install -y yt-dlp && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y wget ffmpeg  && wget https://github.com/ytdl-patched/yt-dlp/releases/download/2023.02.17.334/yt-dlp_linux && chmod +x yt-dlp_linux
 COPY --from=builder /usr/src/ytmp3/target/release/ytmp3 /usr/local/bin/ytmp3
 EXPOSE 8000
 ENTRYPOINT ["/usr/local/bin/ytmp3"]

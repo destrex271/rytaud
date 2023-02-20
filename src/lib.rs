@@ -3,12 +3,12 @@ use std::{process::Command};
 use std::time::{Duration};
 use std::thread;
 
-pub async fn download(url: &str, key: &str, pref_format: &str) -> Result<String, std::io::Error>{
+pub async fn download(url: &str, key: &str, pref_format: &str) -> Result<String, String>{
     println!("Starting");
-    let _ = Command::new("youtube-dl")
+    let _ = Command::new("/yt-dlp_linux")
         .arg("--rm-cache-dir")
         .output();
-    let output = Command::new("youtube-dl")
+    let output = Command::new("/yt-dlp_linux")
        .arg(url)
        .arg("--extract-audio")
        .arg("--audio-format")
@@ -16,7 +16,11 @@ pub async fn download(url: &str, key: &str, pref_format: &str) -> Result<String,
        .arg("--output")
        .arg(format!("{}.mp3",key))
        .output().expect("Unable to download");
-    println!("{:?}", output);
+    // Error Handling
+    println!("{:?}",output.status);
+    if !output.status.success(){
+        return Err(String::from("Something went Wrong"));
+    }
     println!("Done");
     Ok(String::from(key))
 }

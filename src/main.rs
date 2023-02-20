@@ -3,7 +3,7 @@ mod api;
 use ytmp3;
 // Actix modules
 use actix_files::Files;
-use actix_web::{HttpServer, App, middleware};
+use actix_web::{HttpServer, App, middleware::Logger};
 use actix_cors::Cors;
 // MultiThreading and exit process
 use std::thread;
@@ -20,7 +20,7 @@ async fn main() -> std::io::Result<()>{
     println!("Starting server at: {:?}", std::time::SystemTime::now());
     let server = HttpServer::new(||{
         App::new()
-            .wrap(middleware::Logger::default())
+            .wrap(Logger::default())
             .wrap(
                 Cors::permissive()
             )
